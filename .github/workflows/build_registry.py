@@ -5,6 +5,8 @@ import json
 import os
 import re
 import sys
+import urllib.request
+import urllib.error
 from pathlib import Path
 
 try:
@@ -31,6 +33,78 @@ DEFAULT_BASE_URL = "https://github.com/agentclientprotocol/registry/releases/lat
 
 # Icon requirements
 PREFERRED_ICON_SIZE = 16
+
+# URL validation
+SKIP_URL_VALIDATION = os.environ.get("SKIP_URL_VALIDATION", "").lower() in ("1", "true", "yes")
+
+
+def url_exists(url: str, method: str = "HEAD") -> bool:
+    """Check if a URL exists using HEAD or GET request."""
+    try:
+        req = urllib.request.Request(url, method=method)
+        req.add_header("User-Agent", "ACP-Registry-Validator/1.0")
+        with urllib.request.urlopen(req, timeout=15) as response:
+            return response.status in (200, 301, 302)
+    except urllib.error.HTTPError as e:
+        # Some servers don't support HEAD, try GET
+        if method == "HEAD" and e.code in (403, 405):
+            return url_exists(url, method="GET")
+        return False
+    except (urllib.error.URLError, TimeoutError, OSError):
+        return False
+
+
+def extract_npm_package_name(package_spec: str) -> str:
+    """Extract npm package name from spec like @scope/name@version."""
+    # Handle scoped packages: @scope/name@version -> @scope/name
+    if package_spec.startswith("@"):
+        # Find the second @ (version separator) if it exists
+        at_positions = [i for i, c in enumerate(package_spec) if c == "@"]
+        if len(at_positions) > 1:
+            return package_spec[:at_positions[1]]
+        return package_spec
+    else:
+        # Unscoped: name@version -> name
+        return package_spec.split("@")[0]
+
+
+def validate_distribution_urls(distribution: dict) -> list[str]:
+    """Validate that distribution URLs exist."""
+    if SKIP_URL_VALIDATION:
+        return []
+
+    errors = []
+
+    # Check binary archive URLs
+    if "binary" in distribution:
+        for platform, target in distribution["binary"].items():
+            if "archive" in target:
+                url = target["archive"]
+                if not url_exists(url):
+                    errors.append(f"Binary archive URL not accessible for {platform}: {url}")
+
+    # Check npm package URLs (registry.npmjs.org)
+    seen_npm = set()
+    for dist_type in ("npx", "bunx"):
+        if dist_type in distribution:
+            package = distribution[dist_type].get("package", "")
+            pkg_name = extract_npm_package_name(package)
+            if pkg_name and pkg_name not in seen_npm:
+                seen_npm.add(pkg_name)
+                npm_url = f"https://registry.npmjs.org/{pkg_name}"
+                if not url_exists(npm_url):
+                    errors.append(f"npm package not found: {pkg_name}")
+
+    # Check PyPI package URLs
+    if "uvx" in distribution:
+        package = distribution["uvx"].get("package", "")
+        # Extract package name without version specifier
+        pkg_name = re.split(r'[<>=!@]', package)[0]
+        pypi_url = f"https://pypi.org/pypi/{pkg_name}/json"
+        if not url_exists(pypi_url):
+            errors.append(f"PyPI package not found: {pkg_name}")
+
+    return errors
 
 
 def validate_icon(icon_path: Path) -> list[str]:
@@ -226,6 +300,16 @@ def build_registry():
             has_errors = True
             continue
         seen_ids[agent_id] = agent_dir.name
+
+        # Validate distribution URLs
+        if "distribution" in agent:
+            url_errors = validate_distribution_urls(agent["distribution"])
+            if url_errors:
+                print(f"Error: {agent_dir.name} distribution URL validation failed:")
+                for error in url_errors:
+                    print(f"  - {error}")
+                has_errors = True
+                continue
 
         # Validate and set icon URL if icon exists
         icon_path = agent_dir / "icon.svg"

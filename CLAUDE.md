@@ -39,6 +39,9 @@ This is a registry of ACP (Agent Client Protocol) agents. The structure is:
 - `version`: semantic versioning (e.g., `1.0.0`)
 - `distribution`: at least one of `binary`, `npx`, `bunx`, `uvx`
 - `icon.svg`: must be 16x16 (warnings for non-compliance)
+- **URL validation**: All distribution URLs must be accessible (binary archives, npm/PyPI packages)
+
+Set `SKIP_URL_VALIDATION=1` to bypass URL checks during local development.
 
 ## Distribution Types
 

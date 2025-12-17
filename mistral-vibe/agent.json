@@ -18,7 +18,7 @@
         "cmd": "./vibe-acp"
       },
       "linux-aarch64": {
-        "archive": "https://github.com/mistralai/mistral-vibe/releases/download/v1.1.1/vibe-acp-linux-aarch64-1.1.3.zip",
+        "archive": "https://github.com/mistralai/mistral-vibe/releases/download/v1.1.3/vibe-acp-linux-aarch64-1.1.3.zip",
         "cmd": "./vibe-acp"
       },
       "linux-x86_64": {
@@ -26,7 +26,7 @@
         "cmd": "./vibe-acp"
       },
       "windows-aarch64": {
-        "archive": "https://github.com/mistralai/mistral-vibe/releases/download/v1.1.1/vibe-acp-windows-aarch64-1.1.3.zip",
+        "archive": "https://github.com/mistralai/mistral-vibe/releases/download/v1.1.3/vibe-acp-windows-aarch64-1.1.3.zip",
         "cmd": "./vibe-acp.exe"
       },
       "windows-x86_64": {

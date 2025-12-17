@@ -7,13 +7,13 @@ A registry of agents implementing the [Agent Client Protocol (ACP)](https://gith
 Fetch the registry index:
 
 ```
-https://github.com/<org>/<repo>/releases/latest/download/registry.json
+https://github.com/agentclientprotocol/registry/releases/latest/download/registry.json
 ```
 
 Fetch agent icons:
 
 ```
-https://github.com/<org>/<repo>/releases/latest/download/<agent-id>.svg
+https://github.com/agentclientprotocol/registry/releases/latest/download/<agent-id>.svg
 ```
 
 ## Registry Format

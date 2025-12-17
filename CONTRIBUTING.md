@@ -122,8 +122,14 @@ To update your agent's version or distribution URLs:
 
 ## Validation
 
-All submissions are validated against the [JSON Schema](agent.schema.json). Run locally:
+All submissions are validated against the [JSON Schema](agent.schema.json). Additionally, **all distribution URLs must be accessible** - the CI validates that:
+
+- Binary archive URLs return HTTP 200
+- npm packages exist on registry.npmjs.org
+- PyPI packages exist on pypi.org
+
+Run validation locally:
 
 ```bash
-python .github/workflows/build_registry.py
+uv run --with jsonschema .github/workflows/build_registry.py
 ```
