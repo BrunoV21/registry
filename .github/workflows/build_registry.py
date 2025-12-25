@@ -486,6 +486,13 @@ def build_registry():
             icon_dst = dist_dir / f"{agent_id}.svg"
             icon_dst.write_bytes(icon_src.read_bytes())
 
+    # Copy schema files to dist
+    for schema_file in ("agent.schema.json", "registry.schema.json"):
+        schema_src = registry_dir / schema_file
+        if schema_src.exists():
+            schema_dst = dist_dir / schema_file
+            schema_dst.write_bytes(schema_src.read_bytes())
+
     print(f"\nBuilt dist/ with {len(agents)} agents")
 
 
