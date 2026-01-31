@@ -28,15 +28,6 @@ Fetch the registry index:
 https://cdn.agentclientprotocol.com/registry/v1/latest/registry.json
 ```
 
-## Documentation Site
-
-Generate the agents list and run the local docs server:
-
-```bash
-uv run .github/workflows/generate_mintlify_agents.py
-cd .docs && npx mintlify dev --port 3000
-```
-
 ## Registry Format
 
 See [FORMAT.md](FORMAT.md) for the registry schema, distribution types, and platform targets.
